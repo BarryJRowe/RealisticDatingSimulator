@@ -13,7 +13,8 @@ python3 serve.py
  "groq_key": "...", 
  "port": 4000, 
  "local_llm": false, 
- "difficulty": 1.4
+ "difficulty": 1.4,
+ "show_score": false
 }
 ```
 
