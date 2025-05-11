@@ -262,10 +262,6 @@
     chatHistory.push({sender: "match", text: "..."})
     getResponse(chatHistory,0)
   }
-  //const chatHistory = [
-  //  { sender: "match", text: "Hey! I saw you liked my aquascape pictures!" },
-  //  { sender: "user", text: "Hi! They're beautiful. Did you design them all yourself?" }
-  //];
   let failed = 0;
   function renderMessages() {
     chatBox.innerHTML = "";
@@ -279,8 +275,11 @@
         let last = ll[ll.length-1]
 
         if (last && last.includes("/")) {
-          //div.textContent = ll.slice(0,-1).join("\n")
-          div.textContent = mes;
+          {% if show_score %}
+            div.textContent = mes;
+          {% else %}
+            div.textContent = ll.slice(0,-1).join("\n")
+          {% endif %}
         }
       } else {
         div.textContent = msg.text;

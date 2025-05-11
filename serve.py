@@ -7,6 +7,7 @@ import json
 import random
 import generate
 import chat_service
+import config
 
 create_html = open("html/create.html").read()
 profile_html = open("html/profile.html").read()
@@ -46,7 +47,8 @@ async def profile(request):
 
 
 async def chat_page(request):
-    return HTMLResponse(chat_html)
+    return templates.TemplateResponse("chat.html", {"request": request, "name": "Starlette", "show_score": config.show_score})
+   
 
 
 async def message_page(request):
