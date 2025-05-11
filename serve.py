@@ -1,5 +1,5 @@
 from starlette.applications import Starlette
-from starlette.responses import PlainTextResponse, HTMLResponse, JSONResponse
+from starlette.responses import PlainTextResponse, HTMLResponse, JSONResponse, FileResponse
 from starlette.routing import Route
 from starlette.templating import Jinja2Templates
 import uvicorn
@@ -62,12 +62,17 @@ async def message_page(request):
     print(res)
     return JSONResponse(res)
 
+async def goat(request):
+    return FileResponse("images/goat.png", media_type="image/png")
+
 if __name__ == "__main__":
     config.load_config()
     app = Starlette(debug=True, routes=[
         Route(f"{config.prefix}/", homepage),
         Route(f"{config.prefix}/profile", profile),
         Route(f"{config.prefix}/chat", chat_page),
+        Route(f"{config.prefix}/goat.png", goat),
+
         Route(f"{config.prefix}/message", message_page, methods=["POST"]),
     ])
     uvicorn.run(app, host="127.0.0.1", port=config.port)
