@@ -12,8 +12,22 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
+      justify-content: center;
+      align-items: flex-start;
     }
 
+
+.chat-container {
+  margin-left:auto;
+  margin-right:auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 600px;
+  height: 100vh;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
     .chat-header {
       background-color: #4a90e2;
       color: white;
@@ -141,18 +155,19 @@
 </head>
 <body>
 
-<div class="chat-header" id="chatWith"><button id="backButton" title="Go back" onclick="goBack()">&lsaquo;</button>
-<span id="username">...</span></div>
+<div class="chat-container">
+  <div class="chat-header" id="chatWith"><button id="backButton" title="Go back" onclick="goBack()">&lsaquo;</button>
+  <span id="username">...</span></div>
 
-<div class="chat-box" id="chatBox">
-  <!-- Messages will appear here -->
+  <div class="chat-box" id="chatBox">
+    <!-- Messages will appear here -->
+  </div>
+
+  <div class="chat-input">
+    <textarea id="chatMessage" rows="2" placeholder="Type your message..."></textarea>
+    <button id="sendButton" onclick="sendChat()">Send</button>
+  </div>
 </div>
-
-<div class="chat-input">
-  <textarea id="chatMessage" rows="2" placeholder="Type your message..."></textarea>
-  <button id="sendButton" onclick="sendChat()">Send</button>
-</div>
-
 <!-- Completion Modal -->
 <div id="completionModal" class="modal">
   <div class="modal-content">

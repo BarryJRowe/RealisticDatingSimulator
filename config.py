@@ -5,7 +5,7 @@ port = 4000
 local_llm = False
 difficulty = 1.4
 show_score = False
-prefix = "/"
+prefix = ""
 def config_dump():
     open("./config.json", "w").write(json.dumps({
         "groq_key": groq_key, "port": port, 

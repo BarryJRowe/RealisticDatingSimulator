@@ -201,7 +201,7 @@ def save_profile(profile):
 # Example usage
 if __name__ == "__main__":
     config.load_config()
-    for i in range(100):
+    for i in range(1000):
         for g in ["female", "male"]:
             profile = generate_profile(g)
     #for k, v in profile.items():
