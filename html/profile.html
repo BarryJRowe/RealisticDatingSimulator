@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RDS - Profile</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef2f5;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    .profile-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .profile-card h2 {
+      margin-top: 0;
+    }
+    .info-group {
+      margin-bottom: 10px;
+    }
+    .actions {
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .heart { background-color: #ff6b81; color: white; }
+    .skip { background-color: #ccc; }
+    .message { background-color: #4a90e2; color: white; }
+    .hobbies {
+      list-style: none;
+      padding: 0;
+    }
+    .hobbies li {
+      background-color: #f0f0f0;
+      display: inline-block;
+      margin: 3px;
+      padding: 5px 10px;
+      border-radius: 20px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 20px 30px;
+      border-radius: 10px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .close-button {
+      float: right;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 20px 30px;
+      border-radius: 10px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .close-button {
+      float: right;
+      font-size: 24px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<div id="heartModal" class="modal">
+  <div class="modal-content">
+    <span class="close-button" onclick="closeModal()">&times;</span>
+    <h3>You hearted <span id="modalUsername"></span> 💖</h3>
+    <p>If they hearted you back, you'll get a match!</p>
+    <button onclick="closeModal()">OK</button>
+  </div>
+</div>
+<!-- Message Modal -->
+<div id="messageModal" class="modal">
+  <div class="modal-content">
+    <span class="close-button" onclick="closeMessageModal()">&times;</span>
+    <h3>Send a message to <span id="messageUsername"></span></h3>
+    <textarea id="messageText" rows="4" placeholder="Type your message..." style="width: 100%; padding: 8px; font-size: 14px; margin-top: 10px;"></textarea>
+    <br><br>
+    <div id="sentDisplay" style="display:none;margin-bottom:10px;">Sent!</div>
+    <button onclick="submitMessage()" style="padding: 8px 16px;">Send Message</button>
+  </div>
+</div>
+
+<div><button class="skip" id="backButton" style="margin-bottom:5px" title="Start Over" onclick="goBack()">&lsaquo; Start Over</button></div>
+<div class="profile-card" id="profileContainer">
+  <!-- Profile will be rendered here -->
+</div>
+
+<script>
+  function goBack() {
+    window.location = "./";
+  }
+  // Example profiles for testing
+  profile = {{ profile|safe }}
+  let currentIndex = 0;
+  localStorage.setItem("message", "");
+
+  function renderProfile(profile) {
+    const container = document.getElementById("profileContainer");
+    container.innerHTML = `
+      <h2>${profile.username}</h2>
+      <div class="info-group"><strong>Appearance:</strong> ${profile.appearance}</div>
+      <div class="info-group"><strong>Ethnicity:</strong> ${profile.ethnicity}</div>
+      <div class="info-group"><strong>Education:</strong> ${profile.education}</div>
+      <div class="info-group"><strong>Income:</strong> ${profile.income}</div>
+      <div class="info-group"><strong>Hobbies:</strong> <ul class="hobbies">
+        ${profile.hobbies.map(hobby => `<li>${hobby}</li>`).join('')}
+      </ul></div>
+      <div class="info-group"><strong>About Me:</strong><p>${profile.about_me}</p></div>
+      <div class="actions">
+        <button class="skip" onclick="skipProfile()">Skip</button>
+        <button class="heart" onclick="heartProfile()">❤️ Heart</button>
+        <button class="message" onclick="sendMessage()">✉️ Message</button>
+      </div>
+    `;
+  }
+
+  function skipProfile() {
+    window.location = "./profile";
+  }
+
+  function heartProfile() {
+    const modal = document.getElementById("heartModal");
+    const username = profile.username;
+    document.getElementById("modalUsername").textContent = username;
+    modal.style.display = "flex";
+  }
+  let heart_diff = {{difficulty}};
+  function closeModal() {
+    document.getElementById("heartModal").style.display = "none";
+    if (matchable(heart_diff)) {
+      //forward to a message open up a message dialog where they talk first to you.
+      //...
+      localStorage.setItem("message", JSON.stringify({"message": "", "first": "match"}));
+      window.location = "./chat"   
+    } else {
+      skipProfile();
+    }
+  }
+
+  //aaaaaaaaaaaaaaaaaaaaaaa
+  function sendMessage() {
+    document.getElementById("messageUsername").textContent = profile.username;
+    document.getElementById("messageText").value = "";
+    document.getElementById("messageModal").style.display = "flex";
+  }
+
+  function closeMessageModal() {
+    document.getElementById("messageModal").style.display = "none";
+  }
+
+  function submitMessage() {
+   const message = document.getElementById("messageText").value.trim();
+    const username = profile.username;
+    if (message) {
+      document.getElementById("sentDisplay").style.display = "block";
+      document.getElementById("sentDisplay").innerHTML = "Message sent to "+username+"!";
+      setTimeout(function() {
+         let mmm = document.getElementById("messageText").value;
+         let diff = 2
+         if (mmm.length > 25) {
+             diff = 3;
+         }
+         if (matchable(diff)) {
+             //message...
+             localStorage.setItem("message", JSON.stringify({"message": mmm, "first": "user"}));
+             window.location = "./chat"
+         } else {
+             window.location.reload();
+         }
+      }, 1000);
+      //closeMessageModal();
+    } else {
+      alert("Please enter a message before sending.");
+    }
+  }
+
+  //aaaaaaaaaaaaaaaaaa
+  let diff_level_heart = 3;
+
+  function matchable(diff_level) {
+    let user_profile = JSON.parse(localStorage.getItem("user_profile"))
+    let data_profile = profile
+    localStorage.setItem("data_profile", JSON.stringify(profile))
+    console.log([data_profile.appearance, user_profile.appearance])
+    //TODO: add in last_online
+    //...
+    let a1 = Math.random()* diff_level *(user_profile.appearance+1)
+    let e1 = Math.random() * diff_level * (user_profile.education+1)
+    let i1 = Math.random() * diff_level * (user_profile.income+1)
+    console.log([a1,e1,i1])
+    console.log([data_profile.appearance, data_profile.education_level, data_profile.income_level])
+    if (a1 > data_profile.appearance) {
+        if (e1 > data_profile.education_level) {
+            if (i1 > data_profile.income_level) {
+                return true
+            }
+        }
+    }
+    return false;
+  }
+
+  renderProfile(profile);
+</script>
+
+</body>
+</html>
+

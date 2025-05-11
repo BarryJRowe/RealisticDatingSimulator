@@ -1,0 +1,33 @@
+import json
+import os
+groq_key = ""
+port = 4000
+local_llm = False
+difficulty = 1.4
+
+def config_dump():
+    open("./config.json", "w").write(json.dumps({
+        "groq_key": groq_key, "port": port, 
+        "local_llm": local_llm, "difficulty": difficulty
+    }))
+
+def load_config():
+    global groq_key
+    global port
+    global local_llm
+    global difficulty
+    if not os.path.exists("./config.json"):
+        config_dump()
+    data = json.loads(open("./config.json").read())
+    groq_key = data['groq_key']
+    port = data['port']
+    local_llm = data['local_llm']
+    difficulty = data['difficulty']
+    if local_llm:
+        local_llm.load_model()
+
+def main():
+    config_dump()
+
+if __name__=="__main__":
+    main()

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RDS: Chat</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef2f5;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .chat-header {
+      background-color: #4a90e2;
+      color: white;
+      padding: 15px 20px;
+      font-size: 20px;
+    }
+
+    .chat-box {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      background-color: #f9f9f9;
+    }
+
+    .message {
+      margin-bottom: 12px;
+      padding: 10px 15px;
+      border-radius: 16px;
+      max-width: 70%;
+      word-wrap: break-word;
+    }
+
+    .user-message {
+      align-self: flex-end;
+      background-color: #4a90e2;
+      color: white;
+    }
+
+    .match-message {
+      align-self: flex-start;
+      background-color: #ddd;
+      color: #333;
+    }
+
+    .chat-input {
+      display: flex;
+      padding: 10px;
+      background-color: white;
+      border-top: 1px solid #ccc;
+    }
+
+    .chat-input textarea {
+      flex: 1;
+      resize: none;
+      font-size: 14px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .chat-input button {
+      margin-left: 10px;
+      padding: 10px 15px;
+      font-size: 14px;
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 100;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: white;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 30px 20px;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+
+
+
+
+
+.close-button {
+  float: right;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+#backButton {
+  #position: absolute;
+  top: 15px;
+  left: 15px;
+  font-size: 32px;
+  background: none;
+  border: none;
+  color: #CCC;
+  cursor: pointer;
+  z-index: 10;
+}
+
+#backButton:hover {
+  color: #FFF;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+
+  </style>
+</head>
+<body>
+
+<div class="chat-header" id="chatWith"><button id="backButton" title="Go back" onclick="goBack()">&lsaquo;</button>
+<span id="username">...</span></div>
+
+<div class="chat-box" id="chatBox">
+  <!-- Messages will appear here -->
+</div>
+
+<div class="chat-input">
+  <textarea id="chatMessage" rows="2" placeholder="Type your message..."></textarea>
+  <button id="sendButton" onclick="sendChat()">Send</button>
+</div>
+
+<!-- Completion Modal -->
+<div id="completionModal" class="modal">
+  <div class="modal-content">
+    <span class="close-button" onclick="closeCompletionModal()">&times;</span>
+    <h2>🎉 It’s a Date!</h2>
+    <p>You’ve made a real connection with <strong id="username1">AquaSpectra</strong> and went on a date. How did it go? <span id="result"></span></p>
+    <button onclick="closeCompletionModal()">Back to Matches</button>
+  </div>
+</div>
+
+<script>
+  function goBack() {
+    window.location = "./profile"
+  }
+  function completeChat() {
+    document.getElementById("username1").innerText = data_profile['username'];
+    let elm = document.getElementById("sendButton");
+    elm.onclick = null;
+    elm.style['background-color'] = "#999";    
+    document.getElementById("completionModal").style.display = "flex";
+  }
+
+  function closeCompletionModal() {
+    document.getElementById("completionModal").style.display = "none";
+    setTimeout(function() {
+      window.location = "./";
+    }, 1000);
+  }
+
+  function getResponse(history, over) {
+    //..........
+    let hist;
+    if (over != undefined) {
+        hist = [...history.slice(0, over), ...history.slice(over+1)];
+    } else {
+        hist = [...history];
+    }
+    fetch("/message", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({"history": hist, "match": data_profile, "user": user_profile})
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then(data => {
+        let chat_message = data['message'];
+        if (data['result'])
+          document.getElementById("result").innerText = data['result'];
+
+        if (over != undefined) {
+          chatHistory[over] = {sender: "match", text: chat_message}
+        } else {
+          chatHistory.push({sender: "match", text: chat_message})
+        }
+        let last = chat_message.split("\n");
+        last = last[last.length-1];
+        if (last.includes("ASK_OUT")) {           
+
+          setTimeout(function(){completeChat();}, 2000);
+          last = chat_message.split("\n")
+          last = last[last.length-2];
+        }
+        let rr = last.trim().split(" ");
+        let rating;
+        for (let i=0;i<rr.length;i++) {
+          if (rr[i].includes("/")) {
+          document.getElementById("username1").innerText = data_profile['username'];  rating = parseInt(rr[i].split("/")[0]);
+            break;      
+          }
+        }
+        if (rating < 5) {
+          if (failed == 0) {
+            failed = 1;
+            if (rating < 2 || Math.random() < 0.1) {
+              failed = 2;
+            }            
+          }
+        }
+        if (failed == 2) {
+          chatHistory.pop()
+        }
+        renderMessages();
+      })
+      .catch(error => {
+ console.log(error.message)
+        document.getElementById("result").innerHTML = "An error occurred: " + error.message;
+      });
+  }
+  let user_profile = JSON.parse(localStorage.getItem("user_profile"))
+  let data_profile = JSON.parse(localStorage.getItem("data_profile"))
+  document.getElementById("username").innerText = "Chat with "+data_profile['username'];
+
+  const chatBox = document.getElementById("chatBox");
+  const chatMessage = document.getElementById("chatMessage");
+  const message = localStorage.getItem("message")
+
+  let chatHistory = [];
+  if (message['first'] == 'user') {
+    chatHistory.push({sender: "user", text: message['message']})
+  } else {
+    chatHistory.push({sender: "match", text: "..."})
+    getResponse(chatHistory,0)
+  }
+  //const chatHistory = [
+  //  { sender: "match", text: "Hey! I saw you liked my aquascape pictures!" },
+  //  { sender: "user", text: "Hi! They're beautiful. Did you design them all yourself?" }
+  //];
+  let failed = 0;
+  function renderMessages() {
+    chatBox.innerHTML = "";
+    chatHistory.forEach(msg => {
+      const div = document.createElement("div");
+      div.classList.add("message");
+      div.classList.add(msg.sender === "user" ? "user-message" : "match-message");
+      if (msg.sender == 'match') {
+        let mes = msg.text;
+        let ll = mes.trim().split('\n');
+        let last = ll[ll.length-1]
+
+        if (last && last.includes("/")) {
+          //div.textContent = ll.slice(0,-1).join("\n")
+          div.textContent = mes;
+        }
+      } else {
+        div.textContent = msg.text;
+      }
+      chatBox.appendChild(div);
+    });
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  function sendChat() {
+    const message = chatMessage.value.trim();
+    if (message) {
+      chatHistory.push({ sender: "user", text: message });
+      chatMessage.value = "";
+      renderMessages();
+      if (failed == 0) 
+        getResponse(chatHistory);
+    }
+  }
+  renderMessages();
+</script>
+
+</body>
+</html>
+

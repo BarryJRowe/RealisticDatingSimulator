@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Realistic Dating Simulator - Character Setup</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f7f9;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    input[type="text"], select {
+      width: 100%;
+      padding: 8px;
+      font-size: 16px;
+    }
+    .attributes {
+      margin-top: 20px;
+    }
+    .attribute {
+      margin-bottom: 10px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px;
+      width: 100%;
+      font-size: 18px;
+      border: none;
+      cursor: pointer;
+    }
+    .points-remaining {
+      font-weight: bold;
+      margin-top: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<h1>Realistic Dating Simulator</h1>
+<h2>Setup Your Profile</h2>
+<div class="form-group">
+  <label for="playerName">Username</label>
+  <input type="text" id="playerName" placeholder="Enter your username">
+</div>
+
+<div class="form-group">
+  <label for="gender">Gender</label>
+  <select id="gender">
+    <option value="">Select gender</option>
+    <option value="male">Male</option>
+    <option value="female">Female</option>
+    <option value="nonbinary">Non-Binary</option>
+    <option value="other">Other</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label for="lookingFor">Looking For</label>
+  <select id="lookingFor">
+    <option value="">Select gender</option>
+    <option value="male">Male</option>
+    <option value="female">Female</option>
+    <option value="any">Any</option>
+  </select>
+</div>
+
+<div class="attributes">
+  <h2>Distribute 10 Attribute Points</h2>
+  <div class="attribute">
+    Appearance: <input type="number" id="appearance" min="0" max="10" value="0">
+  </div>
+  <div class="attribute">
+    Education: <input type="number" id="education" min="0" max="5" value="0">
+  </div>
+  <div class="income">
+    Income: <input type="number" id="income" min="0" max="5" value="0">
+  </div>
+  <div class="points-remaining" id="pointsRemaining">Points remaining: 10</div>
+  <div class="form-group" style="margin-top: 20px;">
+    <label for="aboutMe"><strong>About Me:</strong></label>
+    <textarea id="aboutMe" rows="4" placeholder="Tell us about yourself..." style="width: 100%; padding: 8px; font-size: 14px;"></textarea>
+  </div>
+</div>
+
+<button onclick="startGame()">Start Game</button>
+
+
+
+<script>
+  //Creation page.
+  const maxPoints = 10;
+  const createInputs = ["appearance", "education", "income"].map(id => document.getElementById(id));
+  const pointsDisplay = document.getElementById("pointsRemaining");
+
+  function updatePoints() {
+    let total = createInputs.reduce((sum, input) => sum + parseInt(input.value || 0), 0);
+    pointsDisplay.textContent = "Points remaining: " + (maxPoints - total);
+  }
+
+  createInputs[0].addEventListener("input", updatePoints);
+  createInputs[1].addEventListener("input", updatePoints);
+  createInputs[2].addEventListener("input", updatePoints);
+
+  function startGame() {
+    clearProfile()
+    const name = document.getElementById("playerName").value.trim();
+    const gender = document.getElementById("gender").value;
+    const looking_for = document.getElementById("lookingFor").value;
+    let total = 0
+    total += parseInt(createInputs[0].value);
+    total += parseInt(createInputs[1].value);
+    total += parseInt(createInputs[2].value);
+    console.log(total)
+    if (!name || !gender) {
+      alert("Please enter your name and gender.");
+      return;
+    }
+    if (!name || !looking_for) {
+      alert("Please enter your name and gender.");
+      return;
+    }
+
+    if (total !== maxPoints) {
+      alert("You must allocate exactly 10 points.");
+      return;
+    }
+    document.cookie = "looking_for="+looking_for;
+    const playerProfile = {
+      name,
+      gender,
+      looking_for, 
+      appearance: parseInt(document.getElementById("appearance").value),
+      education: parseInt(document.getElementById("education").value),
+      income: parseInt(document.getElementById("income").value),
+      about_me: document.getElementById("aboutMe").value,
+    };
+    console.log("Player Profile:", playerProfile);
+
+    // You could now transition to the next page or game state here.
+    //alert("Profile created! (Check console for details)");
+    saveProfile(playerProfile);
+    window.location = "./profile"
+  }
+
+  function clearProfile() {
+    localStorage.setItem("user_profile", "");
+  }
+
+  function saveProfile(profile) {
+    localStorage.setItem("user_profile", JSON.stringify(profile));
+  }
+</script>
+
+</body>
+</html>
+

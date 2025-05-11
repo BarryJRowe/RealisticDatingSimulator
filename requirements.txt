@@ -1,0 +1,8 @@
+starlette
+openai
+numpy
+transformers
+accelerate
+sentencepiece
+torch
+requests

@@ -1,0 +1,7 @@
+-add in to website
+-add in groq key
+#-add in config options:
+#  -groq key
+#  -use local
+#  -port
+#  -difficulty
