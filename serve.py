@@ -62,16 +62,13 @@ async def message_page(request):
     print(res)
     return JSONResponse(res)
 
-
-app = Starlette(debug=True, routes=[
-    Route("/", homepage),
-    Route("/profile", profile),
-    Route("/chat", chat_page),
-    Route("/message", message_page, methods=["POST"]),
-
-])
-
 if __name__ == "__main__":
     config.load_config()
+    app = Starlette(debug=True, routes=[
+        Route(f"{config.prefix}/", homepage),
+        Route(f"{config.prefix}/profile", profile),
+        Route(f"{config.prefix}/chat", chat_page),
+        Route(f"{config.prefix}/message", message_page, methods=["POST"]),
+    ])
     uvicorn.run(app, host="127.0.0.1", port=config.port)
 
